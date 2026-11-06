@@ -9,12 +9,15 @@ server {
     }
 
     # No URI on proxy_pass, so /api/ is forwarded unchanged. BACKEND_URL has no trailing slash.
+    # Azure Container Apps rejects nginx's default HTTP/1.0 upstream with 426.
     location /api/ {
-        proxy_pass ${BACKEND_URL};
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
         proxy_set_header Host $proxy_host;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_ssl_server_name on;
+        proxy_pass ${BACKEND_URL};
     }
 
     location / {
