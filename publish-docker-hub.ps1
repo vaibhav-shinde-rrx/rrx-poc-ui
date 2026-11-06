@@ -20,7 +20,7 @@ Write-Host "==> check docker"
 if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
     throw "docker CLI not found. Install Docker and ensure it is on PATH."
 }
-docker info *> $null
+cmd /c "docker info >nul 2>&1"
 if ($LASTEXITCODE -ne 0) {
     throw "Docker daemon is not running."
 }
@@ -50,7 +50,8 @@ if (-not $SkipPush -and -not $SkipLogin) {
 
 if ($Tag -ne "latest" -and -not $SkipPush) {
     Write-Host "==> check remote tag ${RemoteImage}:${Tag}"
-    docker manifest inspect "${RemoteImage}:${Tag}" *> $null
+    # cmd /c keeps Windows PowerShell 5.1 from turning the expected "no such manifest" stderr into a terminating error.
+    cmd /c "docker manifest inspect ${RemoteImage}:${Tag} >nul 2>&1"
     if ($LASTEXITCODE -eq 0) {
         throw "${RemoteImage}:${Tag} already exists on Docker Hub. Versions are never overwritten."
     }
